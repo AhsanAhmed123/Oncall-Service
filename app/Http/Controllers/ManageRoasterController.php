@@ -10,7 +10,7 @@ class ManageRoasterController extends Controller
     public function index()
     {
         $rosters = Roster::where('active_user_id', auth()->user()->id)->get();
-        $employees = User::all();
+        $employees = User::where('added_by', auth()->user()->id)->get();
         return view('Roaster.index', compact('rosters', 'employees'));
     }
 
@@ -47,6 +47,8 @@ class ManageRoasterController extends Controller
 
     public function store(Request $request)
     {
+        try {
+            
         Roster::create([
             'username'   => $request->username,
             'start_date' => $request->start_time,
@@ -56,6 +58,9 @@ class ManageRoasterController extends Controller
         ]);
 
         return response()->json(['message' => 'Roster added successfully!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function updateEvent(Request $request)

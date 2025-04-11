@@ -90,6 +90,7 @@
                 alert('Roster saved!');
                 location.reload();
             }
+
         });
     }
 

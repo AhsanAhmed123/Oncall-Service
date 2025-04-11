@@ -9,14 +9,19 @@ use App\Models\ivr_options;
 use App\Models\backupOrder;
 use App\Models\ivr_schedule_greeting;
 use App\Models\CallRecording;
+use Illuminate\Support\Facades\Log;
 
 class TwilioIVRController extends Controller
 {
     
     public function handleIncomingCall(Request $request)
-    {
+    {  
+        $calledNumber = $request->input('To');
+        // $fromNumber = $request->input('From');
+        Log::info('Incoming call to number: ' . $calledNumber);
         $response = new VoiceResponse();
-        $ivrConfig = ivr_configurations::first();
+        $ivrConfig = ivr_configurations::where('did_number', 'LIKE', "%$calledNumber%")->first();
+   
         $currentDateTime = now()->setTimezone('Asia/Karachi'); 
         
         $scheduledGreeting = ivr_schedule_greeting::where('start_date_time', '<=', $currentDateTime)
@@ -27,10 +32,12 @@ class TwilioIVRController extends Controller
         if ($ivrConfig) {
             $voice = $ivrConfig->ttstype === 'john' ? 'man' : ($ivrConfig->ttstype === 'sophia' ? 'woman' : 'man');
         }
-    
+        
+        $actionUrl = url('/ivr/handle-input') . '?ivr_config_id=' . ($ivrConfig->id ?? 0);
+        
         $gather = $response->gather([
             'numDigits' => 1,
-            'action' => url('/ivr/handle-input'), 
+            'action' => $actionUrl, 
             'method' => 'POST'
         ]);
     
@@ -60,8 +67,9 @@ class TwilioIVRController extends Controller
        
         $response = new VoiceResponse();
         $digit = $request->input('Digits');
+        $ivrConfigId = $request->query('ivr_config_id');
     
-        $ivr_options = ivr_options::whereHas('department', function ($query) use ($digit) {
+        $ivr_options = ivr_options::where('ivr_config_id',$ivrConfigId)->whereHas('department', function ($query) use ($digit) {
             $query->where('assigned_key', $digit);
         })->first();
     

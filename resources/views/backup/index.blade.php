@@ -12,6 +12,7 @@
     <div class="row">
         <div class="col-md-6">
     <div class="tab-div">
+        <h2>Choose a department</h2>
         <div class="tabs">
             @foreach($departments as $department)
                 <div class="tab" onclick="showDetails({{ $department->id }})">

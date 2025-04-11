@@ -130,7 +130,7 @@ class IvrController extends Controller
     }
 
     public function save_options(Request $request)
-{
+    {
     if (!$request->ivrId) {
         return response()->json([
             'message' => 'Please configure IVR first',

@@ -113,6 +113,15 @@
             <div><input type="checkbox"  required style="display: inline;"><div style="margin-bottom: 5px; display: inline;"><p style="margin-left: 5px; font-size: 12px; display: inline;">By checking the box you are opt in to receive sms messages from this platform.</p><p style="cursor: pointer; margin-left: 2px; font-size: 12px; color: blue; display: inline;">opt in agreement</p></div></div>
             <button type="submit" class="btn">Login</button>
         </form>
+
+    </br>
+    </br>
+        <div class="text-center mt-3">
+            <a href="{{ route('password.request') }}" class="text-sm text-primary" style="text-decoration: underline;">
+                Forgot Password?
+            </a>
+        </div>
+        
     </div>
  
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

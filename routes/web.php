@@ -17,6 +17,9 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController;
+
 
 Route::get('/clear', function () {
     Artisan::call('cache:clear');
@@ -32,6 +35,11 @@ Route::get('/clear', function () {
     Route::group(['middleware' => ['admin.guest']], function () {
         Route::get('/', [AuthController::class, 'login'])->name('login');
         Route::post('/login', [AuthController::class, 'postLogin'])->name('admin.authenticate');        
+        Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+        Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+        Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
     });
 
     // Apply auth middleware to protect these routes
@@ -44,6 +52,9 @@ Route::get('/clear', function () {
         //Dashboard routes
         Route::get('dashboard', [DashbaordController::class, 'index'])->name('index-dashboard');
         //sms routes
+
+
+
         Route::get('index-sms', [SmsController::class, 'index'])->name('index-sms');
         Route::post('/send-sms', [SmsController::class, 'sendSms'])->name('send.sms');
         

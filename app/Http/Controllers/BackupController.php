@@ -13,7 +13,7 @@ class BackupController extends Controller
 {
     public function index()
     {
-        $departments = Department::all();
+        $departments = Department::where('active_user_id', auth()->user()->id)->get();
         $user =User::where('added_by', auth()->user()->id)->get();
         return view('backup.index',compact('user','departments'));
     }
@@ -21,9 +21,10 @@ class BackupController extends Controller
     public function details($departmentId)
     {
         $department = Department::findOrFail($departmentId);
+      
         $users = backupOrder::with('users')->where('department_id', $departmentId)->OrderBy('position', 'asc')->get();
-
-        $oncallPeople = User::where('added_by', auth()->user()->id)->get();
+   
+        $oncallPeople = User::where('added_by', auth()->user()->id)->where('department_id', $departmentId)->get();
 
         $view = view('backup.partial.index');
         // Pass the data to the partial view

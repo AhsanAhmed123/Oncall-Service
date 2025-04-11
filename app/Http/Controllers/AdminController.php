@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\business_details;
 use DB;
+use App\Models\ivr_configurations;
 
 class AdminController extends Controller
 {
@@ -17,7 +18,7 @@ class AdminController extends Controller
     {
         $users = User::with('business_details')->where('role_id', 3)->get();
      
-        return view('Admin.accounts.index',compact('users'));
+        return view('Admin.Accounts.index',compact('users'));
     }
 
     public function store(Request $request)
@@ -81,7 +82,19 @@ class AdminController extends Controller
             
 
                 $account = business_details::create($accountData);
-            
+                
+                if($request->did_number || $request->business_phone)
+                {
+                    $ivr = ivr_configurations::create([
+                        'did_number' => str_replace(' ', '',$request->did_number),
+                        'business_phone' => $request->business_phone,
+                        'added_by' => $user->id,
+                        'ivr_type' => "TTS",
+                        'ttstype' => 'john',
+                        'repeat_count' => 1,
+                    ]);
+                }
+
                 DB::commit();
               
            } 

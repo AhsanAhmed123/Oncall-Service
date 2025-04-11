@@ -82,6 +82,7 @@
     <br>
 
     <div class="page-content-wrapper container">
+
         <!-- Left Panel -->
         <div class="left-panel">
             <div class="buttons">
@@ -140,113 +141,115 @@
         </div>
     </div>
 
-    <script>
+@section('scripts')
+   <script>
+    $(document).ready(function () {
+
         // Show Add Form
-        function showAddForm() {
-            document.getElementById('formTitle').innerText = 'Add Department';
-            document.getElementById('departmentId').value = '';
-            document.getElementById('departmentName').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('phone_number').value = '';
-            document.getElementById('assignedKey').value = '';
-            document.querySelector('.form-container').style.display = 'block';
-            
+        window.showAddForm = function () {
+            $('#formTitle').text('Add Department');
+            $('#departmentId').val('');
+            $('#departmentName').val('');
+            $('#email').val('');
+            $('#phone_number').val('');
+            $('#assignedKey').val('');
+            $('#color').val('');
+            $('.form-container').show();
         }
 
         // Edit Record
-        function editRecord(id, name, email, phone_number, assignedKey, color) {
-            document.getElementById('formTitle').innerText = 'Edit Department';
-            document.getElementById('departmentId').value = id;
-            document.getElementById('departmentName').value = name;
-            document.getElementById('email').value = email;
-            document.getElementById('phone_number').value = phone_number;
-            document.getElementById('assignedKey').value = assignedKey;
-            document.getElementById('color').value = color; // Populate the color field
-            document.querySelector('.form-container').style.display = 'block';
+        window.editRecord = function (id, name, email, phone_number, assignedKey, color) {
+            $('#formTitle').text('Edit Department');
+            $('#departmentId').val(id);
+            $('#departmentName').val(name);
+            $('#email').val(email);
+            $('#phone_number').val(phone_number);
+            $('#assignedKey').val(assignedKey);
+            $('#color').val(color);
+            $('.form-container').show();
         }
 
-        function saveForm() {
-            const id = document.getElementById('departmentId').value;
-            const name = document.getElementById('departmentName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone_number = document.getElementById('phone_number').value.trim();
-            const assignedKey = document.getElementById('assignedKey').value;
-            const color = document.getElementById('color').value;
+        // Save Form
+        window.saveForm = function () {
+            const id = $('#departmentId').val();
+            const name = $('#departmentName').val().trim();
+            const email = $('#email').val().trim();
+            const phone_number = $('#phone_number').val().trim();
+            const assignedKey = $('#assignedKey').val();
+            const color = $('#color').val();
 
-            // Basic Validations
-            if (name === "") {
-                alert("Department Name is required.");
+            if (name === '') {
+                alert('Department Name is required.');
                 return;
             }
-            if (email === "" || !validateEmail(email)) {
-                alert("Enter a valid Email.");
+            if (email === '' || !validateEmail(email)) {
+                alert('Enter a valid Email.');
                 return;
             }
-            if (phone_number === "") {
-                alert("phone number is required.");
+            if (phone_number === '') {
+                alert('Phone number is required.');
                 return;
             }
-            if (assignedKey === "") {
-                alert("Please select an Assigned Key.");
+            if (assignedKey === '') {
+                alert('Please select an Assigned Key.');
                 return;
             }
-        
 
             const url = id ? `/departments/${id}` : '/departments';
             const method = id ? 'PUT' : 'POST';
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            fetch(`/departments/${id}`, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        email: email,
-                        phone_number: phone_number,
-                        assigned_key: assignedKey,
-                        colour: color
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text); });
-                    }
-                    return response.json();
-                })
-                .then(data => {
+            $.ajax({
+                url: url,
+                method: method,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    name: name,
+                    email: email,
+                    phone_number: phone_number,
+                    assigned_key: assignedKey,
+                    colour: color
+                }),
+                success: function (response) {
                     alert('Saved successfully!');
-                    window.location.reload();
-                })
-                .catch(error => console.error('Error:', error));
+                    location.reload();
+                },
+                error: function (xhr) {
+                    console.error('Error:', xhr.responseText);
+                }
+            });
+        }
 
+        // Delete Record
+        window.deleteRecord = function (event, id) {
+            event.stopPropagation();
+            if (confirm('Are you sure you want to delete this record?')) {
+                $.ajax({
+                    url: `/departments/${id}`,
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        alert('Deleted successfully!');
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        console.error('Error:', xhr.responseText);
+                    }
+                });
             }
-        
-            function validateEmail(email) {
+        }
+
+        // Email Validation
+        function validateEmail(email) {
             const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             return re.test(email);
         }
 
-
-        function deleteRecord(event, id) {
-            event.stopPropagation();
-            if (confirm('Are you sure you want to delete this record?')) {
-                fetch(`/departments/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Retrieve CSRF token
-                    }
-                })
-                .then(response => {
-                    if (response.status === 204) {
-                        alert('Deleted successfully!');
-                        window.location.reload();
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-            }
-        }
-    </script>
+    });
+</script>
+@endsection
 @endsection
